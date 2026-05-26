@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой крутой сайт</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1> Добро пожаловать! </h1>
+        <p class="subtitle">Нажми на кнопку и наслаждайся магией </p>
+
+        <button id="magicBtn">Волшебная кнопка</button>
+
+        <div id="message" class="message"></div>
+
+        <div class="counter">
+            <p>Счётчик нажатий: <span id="count">0</span></p>
+        </div>
+
+        <div class="extra-features">
+
+            <div class="feature">
+                <button id="colorBtn">Сменить цвет фона</button>
+            </div>
+
+            <div class="feature">
+                <button id="resetBtn">Сбросить счётчик</button>
+            </div>
+
+            <div class="feature">
+                <p> Твой любимый цвет:</p>
+                <input type="color" id="colorPicker" value="#667eea">
+            </div>
+
+            <div class="feature">
+                <p>Напиши что-нибудь:</p>
+                <input type="text" id="userText" placeholder="Твоё сообщение...">
+                <button id="textBtn">Добавить</button>
+            </div>
+        </div>
+
+        <div id="userMessages" class="user-messages"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
