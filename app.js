@@ -14,6 +14,8 @@ class MovieSync {
         this.messageInput = document.getElementById('messageInput');
         this.joinBtn = document.getElementById('joinBtn');
         this.sendBtn = document.getElementById('sendBtn');
+        this.videoUrlInput = document.getElementById('videoUrl');
+        this.loadVideoBtn = document.getElementById('loadVideoBtn');
         
         this.roomId = null;
         this.userId = 'u' + Math.random().toString(36).substr(2, 9);
@@ -28,9 +30,47 @@ class MovieSync {
     setupEventListeners() {
         this.joinBtn.addEventListener('click', () => this.joinRoom());
         this.sendBtn.addEventListener('click', () => this.sendMessage());
+        this.loadVideoBtn.addEventListener('click', () => this.loadVideo());
+        
         this.messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.sendMessage();
         });
+        
+        this.videoUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.loadVideo();
+        });
+    }
+
+    loadVideo() {
+        const url = this.videoUrlInput.value.trim();
+        if (!url) {
+            alert('Введите ссылку на видео');
+            return;
+        }
+        
+        if (!url.match(/\.(mp4|webm|ogg|mov)($|\?)/i)) {
+            if (!confirm('Ссылка может не быть видеофайлом. Продолжить?')) {
+                return;
+            }
+        }
+        
+
+        this.video.src = url;
+        this.video.load();
+        this.video.play().catch(() => {
+
+        });
+        
+        if (this.roomId) {
+            update(ref(this.db, `rooms/${this.roomId}/video`), {
+                play: false,
+                time: 0,
+                src: url
+            });
+        }
+        
+        this.addMsg('Видео загружено!', 'system');
+        this.videoUrlInput.value = '';
     }
 
     genId() {
@@ -81,11 +121,17 @@ class MovieSync {
             });
         });
 
-   
         onValue(ref(this.db, `rooms/${this.roomId}/video`), (snap) => {
             if (!snap.exists() || !this.isRemote) return;
             
             const state = snap.val();
+            
+            if (state.src && state.src !== this.video.src) {
+                this.video.src = state.src;
+                this.video.load();
+                this.addMsg('Друг загрузил новое видео', 'system');
+            }
+            
             if (Math.abs(this.video.currentTime - state.time) > 0.5) {
                 this.video.currentTime = state.time;
             }
@@ -133,6 +179,5 @@ class MovieSync {
         this.statusEl.className = `status ${className}`;
     }
 }
-
 
 new MovieSync();
