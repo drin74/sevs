@@ -203,3 +203,37 @@ button:hover {
 .chat::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .video-controls {
+        position: relative;
+        top: 0;
+        left: 0;
+        transform: none;
+        flex-direction: column;
+        width: 100%;
+        padding: 10px;
+    }
+
+    .video-controls input {
+        width: 100%;
+    }
+
+    #video {
+        margin-top: 0;
+    }
+
+    .container {
+        flex-direction: column;
+    }
+
+    .video-section {
+        flex: none;
+    }
+
+    .chat-section {
+        min-width: auto;
+        flex: 1;
+    }
+}
