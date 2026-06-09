@@ -4,49 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой крутой сайт</title>
+    <title>Совместный просмотр</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="container">
-        <h1> Добро пожаловать! </h1>
-        <p class="subtitle">Нажми на кнопку и наслаждайся магией </p>
-
-        <button id="magicBtn">Волшебная кнопка</button>
-
-        <div id="message" class="message"></div>
-
-        <div class="counter">
-            <p>Счётчик нажатий: <span id="count">0</span></p>
+        <div class="video-section">
+            <video id="video" controls>
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            </video>
         </div>
 
-        <div class="extra-features">
-
-            <div class="feature">
-                <button id="colorBtn">Сменить цвет фона</button>
+        <div class="chat-section">
+            <div class="connection-panel">
+                <div class="room-info">
+                    <div>Комната: <span id="roomId" class="highlight">...</span></div>
+                    <small>Отправьте ID другу</small>
+                </div>
+                <div class="join-panel">
+                    <input type="text" id="friendId" placeholder="ID комнаты">
+                    <button id="joinBtn">Войти</button>
+                </div>
+                <div id="status" class="status disconnected">Не подключено</div>
             </div>
 
-            <div class="feature">
-                <button id="resetBtn">Сбросить счётчик</button>
-            </div>
+            <div id="chat" class="chat"></div>
 
-            <div class="feature">
-                <p> Твой любимый цвет:</p>
-                <input type="color" id="colorPicker" value="#667eea">
-            </div>
-
-            <div class="feature">
-                <p>Напиши что-нибудь:</p>
-                <input type="text" id="userText" placeholder="Твоё сообщение...">
-                <button id="textBtn">Добавить</button>
+            <div class="input-panel">
+                <input type="text" id="messageInput" placeholder="Сообщение...">
+                <button id="sendBtn">➤</button>
             </div>
         </div>
-
-        <div id="userMessages" class="user-messages"></div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 
 </html>
