@@ -1,3 +1,4 @@
+/* Базовые настройки */
 * {
     margin: 0;
     padding: 0;
@@ -6,137 +7,157 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0a0a0a;
+    background: #1a1a1a;
     color: #fff;
-    height: 100vh;
+    /* Важно: фиксируем высоту экрана для мобильных */
+    height: 100dvh;
     overflow: hidden;
-}
-
-.video-controls {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-    z-index: 10;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 10px 15px;
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
 }
 
 .container {
     display: flex;
-    height: 100vh;
+    flex-direction: column;
+    height: 100dvh;
+    /* Динамическая высота для мобильных */
+    max-width: 100%;
+    margin: 0 auto;
 }
 
+/* СЕКЦИЯ ВИДЕО */
 .video-section {
-    flex: 3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-shrink: 0;
+    /* Не сжимать */
     background: #000;
-    padding: 20px;
+    padding: 10px;
 }
 
-#video {
+.video-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.video-controls input {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #2a2a2a;
+    color: #fff;
+}
+
+.video-controls button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #0066cc;
+    color: #fff;
+    cursor: pointer;
+}
+
+video {
     width: 100%;
-    max-width: 1000px;
+    max-height: 30vh;
     border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    background: #000;
 }
 
+/* СЕКЦИЯ ЧАТА */
 .chat-section {
     flex: 1;
-    min-width: 350px;
-    background: #1a1a1a;
+    /* Занимает всё оставшееся место */
     display: flex;
     flex-direction: column;
-    border-left: 1px solid #333;
+    overflow: hidden;
+    /* Важно! */
+    background: #121212;
 }
 
+/* Панель подключения (сверху) */
 .connection-panel {
-    padding: 15px;
-    background: #252525;
+    flex-shrink: 0;
+    /* Не сжимать */
+    padding: 12px;
+    background: #1e1e1e;
     border-bottom: 1px solid #333;
 }
 
 .room-info {
     margin-bottom: 10px;
     padding: 10px;
-    background: #1a1a1a;
-    border-radius: 6px;
+    background: #2a2a2a;
+    border-radius: 8px;
 }
 
 .highlight {
     color: #00ff88;
     font-weight: bold;
-    font-size: 1.1em;
+    font-family: monospace;
 }
 
 .join-panel {
     display: flex;
     gap: 8px;
+    margin-bottom: 8px;
 }
 
-input {
+.join-panel input {
     flex: 1;
     padding: 8px 12px;
     border: 1px solid #444;
     border-radius: 6px;
     background: #2a2a2a;
     color: #fff;
-    outline: none;
 }
 
-input:focus {
-    border-color: #00ff88;
-}
-
-button {
+.join-panel button {
     padding: 8px 16px;
     border: none;
     border-radius: 6px;
-    background: #0066ff;
+    background: #00aa55;
     color: #fff;
     cursor: pointer;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-
-button:hover {
-    background: #0052cc;
 }
 
 .status {
-    margin-top: 8px;
-    font-size: 0.85em;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
 }
 
-.connected {
+.status.connected {
+    background: #00aa5533;
     color: #00ff88;
 }
 
-.disconnected {
-    color: #ff4444;
+.status.disconnected {
+    background: #ff444433;
+    color: #ff6666;
 }
 
+/* ЧАТ (СКРОЛЛИТСЯ ТОЛЬКО ЭТОТ БЛОК!) */
 .chat {
     flex: 1;
-    padding: 15px;
+    /* Занимает всё доступное место */
     overflow-y: auto;
+    /* Скролл только здесь! */
+    padding: 15px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    background: #121212;
 }
 
-.message {
-    max-width: 85%;
+/* Стили для сообщений */
+.chat .message {
     padding: 10px 14px;
     border-radius: 12px;
+    max-width: 85%;
     word-wrap: break-word;
-    animation: fadeIn 0.3s;
+    animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
@@ -151,42 +172,87 @@ button:hover {
     }
 }
 
-.message.my {
-    background: #0066ff;
-    align-self: flex-end;
-}
-
-.message.other {
-    background: #2a2a2a;
-    align-self: flex-start;
-}
-
-.message.system {
-    background: #333;
-    color: #ffd700;
+.chat .message.system {
     align-self: center;
-    font-size: 0.85em;
+    background: #2a2a2a;
+    color: #888;
+    font-size: 13px;
     text-align: center;
 }
 
+.chat .message.local {
+    align-self: flex-end;
+    background: #0066cc;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+.chat .message.remote {
+    align-self: flex-start;
+    background: #2a2a2a;
+    color: #fff;
+    border-bottom-left-radius: 4px;
+}
+
+/* Панель ввода (снизу) */
 .input-panel {
-    padding: 15px;
+    flex-shrink: 0;
+    /* Не сжимать */
     display: flex;
     gap: 10px;
+    padding: 12px;
+    background: #1e1e1e;
     border-top: 1px solid #333;
-    background: #252525;
 }
 
 .input-panel input {
     flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 24px;
+    background: #2a2a2a;
+    color: #fff;
+    font-size: 15px;
 }
 
 .input-panel button {
-    width: 45px;
-    padding: 0;
-    font-size: 1.2em;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: #0066cc;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+.input-panel button:active {
+    transform: scale(0.95);
+}
+
+/* Адаптив для очень маленьких экранов */
+@media (max-width: 480px) {
+    .video-controls {
+        flex-direction: column;
+    }
+
+    .video-controls input {
+        min-width: 100%;
+    }
+
+    video {
+        max-height: 25vh;
+    }
+
+    .chat .message {
+        max-width: 90%;
+    }
+}
+
+/* Кастомный скроллбар для чата */
 .chat::-webkit-scrollbar {
     width: 6px;
 }
@@ -202,38 +268,4 @@ button:hover {
 
 .chat::-webkit-scrollbar-thumb:hover {
     background: #555;
-}
-
-/* Адаптивность для мобильных */
-@media (max-width: 768px) {
-    .video-controls {
-        position: relative;
-        top: 0;
-        left: 0;
-        transform: none;
-        flex-direction: column;
-        width: 100%;
-        padding: 10px;
-    }
-
-    .video-controls input {
-        width: 100%;
-    }
-
-    #video {
-        margin-top: 0;
-    }
-
-    .container {
-        flex-direction: column;
-    }
-
-    .video-section {
-        flex: none;
-    }
-
-    .chat-section {
-        min-width: auto;
-        flex: 1;
-    }
 }
