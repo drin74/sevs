@@ -1,482 +1,299 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+import { getDatabase, ref, set, push, onValue, update } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    color: #fff;
-    height: 100vh;
-    height: 100dvh; /* Dynamic viewport height для мобильных */
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-}
-
-.container {
-    display: flex;
-    height: 100%;
-    width: 100vw;
-}
-
-/* Video Section */
-.video-section {
-    flex: 3;
-    display: flex;
-    flex-direction: column;
-    background: #000;
-    position: relative;
-    overflow: hidden;
-}
-
-.video-wrapper {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    background: #000;
-    width: 100%;
-    height: 100%;
-}
-
-#video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #000;
-}
-
-/* Chat Section */
-.chat-section {
-    flex: 1;
-    min-width: 350px;
-    max-width: 420px;
-    background: #1a1a2e;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.2);
-}
-
-.chat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    flex-shrink: 0;
-}
-
-.header-buttons {
-    display: flex;
-    gap: 8px;
-}
-
-.btn-header {
-    width: 36px;
-    height: 36px;
-    border: none;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-header:active {
-    transform: scale(0.95);
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.room-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.room-label {
-    font-size: 10px;
-    opacity: 0.9;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.room-id {
-    font-size: 16px;
-    font-weight: 700;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 1px;
-}
-
-/* Settings Panel (сворачиваемая) */
-.settings-panel {
-    background: #16213e;
-    border-bottom: 1px solid #0f3460;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    max-height: 500px;
-    flex-shrink: 0;
-}
-
-.settings-panel.collapsed {
-    max-height: 0;
-    border-bottom: none;
-}
-
-.settings-section {
-    padding: 12px 15px;
-    border-bottom: 1px solid #0f3460;
-}
-
-.settings-section:last-child {
-    border-bottom: none;
-}
-
-.section-title {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-.join-panel {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.join-panel input,
-.video-url-panel input {
-    flex: 1;
-    padding: 10px 12px;
-    border: 2px solid #0f3460;
-    border-radius: 8px;
-    background: #1a1a2e;
-    color: #fff;
-    font-size: 13px;
-    outline: none;
-}
-
-.join-panel input::placeholder,
-.video-url-panel input::placeholder {
-    color: #666;
-}
-
-.join-panel input:focus,
-.video-url-panel input:focus {
-    border-color: #667eea;
-}
-
-.btn-success {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 13px;
-    white-space: nowrap;
-}
-
-.btn-success:active {
-    transform: scale(0.95);
-}
-
-.status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: #fff;
-}
-
-.status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #dc3545;
-}
-
-.status.connected .status-dot {
-    background: #28a745;
-    box-shadow: 0 0 8px #28a745;
-}
-
-.video-url-panel {
-    display: flex;
-    gap: 8px;
-}
-
-.btn-video {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 13px;
-    white-space: nowrap;
-}
-
-.btn-video:active {
-    transform: scale(0.95);
-}
-
-/* Chat - больше места! */
-.chat {
-    flex: 1;
-    padding: 12px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: #1a1a2e;
-    min-height: 0; /* Важно для flex */
-    -webkit-overflow-scrolling: touch;
-}
-
-.message {
-    max-width: 85%;
-    padding: 10px 14px;
-    border-radius: 16px;
-    word-wrap: break-word;
-    font-size: 14px;
-    line-height: 1.4;
-    animation: slideIn 0.3s ease-out;
-    color: #fff;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.9);
+class MovieSync {
+    constructor() {
+        this.db = getDatabase(initializeApp({
+            databaseURL: "https://vmeste-bbf68-default-rtdb.firebaseio.com"
+        }));
+        this.video = document.getElementById('video');
+        this.chat = document.getElementById('chat');
+        this.roomIdEl = document.getElementById('roomId');
+        this.statusEl = document.getElementById('status');
+        this.statusTextEl = this.statusEl.querySelector('.status-text');
+        this.friendIdInput = document.getElementById('friendId');
+        this.messageInput = document.getElementById('messageInput');
+        this.joinBtn = document.getElementById('joinBtn');
+        this.sendBtn = document.getElementById('sendBtn');
+        this.videoUrlInput = document.getElementById('videoUrl');
+        this.loadVideoBtn = document.getElementById('loadVideoBtn');
+        this.copyRoomBtn = document.getElementById('copyRoomBtn');
+        this.toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
+        this.settingsPanel = document.getElementById('settingsPanel');
+        this.notifSound = document.getElementById('notifSound');
+        
+        this.roomId = null;
+        this.userId = 'u' + Math.random().toString(36).substr(2, 9);
+        this.lastMsg = 0;
+        this.isRemote = false;
+        this.audioEnabled = false;
+        
+        this.setupEventListeners();
+        this.createRoom();
+        this.setupVideoListeners();
     }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
 
-.message.my {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    align-self: flex-end;
-    border-bottom-right-radius: 4px;
-}
+    setupEventListeners() {
+        this.joinBtn.addEventListener('click', () => this.joinRoom());
+        this.sendBtn.addEventListener('click', () => this.sendMessage());
+        this.loadVideoBtn.addEventListener('click', () => this.loadVideo());
+        this.copyRoomBtn.addEventListener('click', () => this.copyRoomId());
+        this.toggleSettingsBtn.addEventListener('click', () => this.toggleSettings());
+        
+        this.messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.sendMessage();
+        });
+        
+        this.videoUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.loadVideo();
+        });
 
-.message.other {
-    background: #0f3460;
-    align-self: flex-start;
-    border-bottom-left-radius: 4px;
-}
+        // Включение звука после первого взаимодействия
+        document.addEventListener('click', () => this.enableAudio(), { once: true });
+        document.addEventListener('touchstart', () => this.enableAudio(), { once: true });
+    }
 
-.message.system {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    align-self: center;
-    font-size: 11px;
-    text-align: center;
-    padding: 6px 12px;
-    border-radius: 20px;
-}
+    enableAudio() {
+        if (this.audioEnabled) return;
+        this.notifSound.volume = 0.5;
+        this.notifSound.play().then(() => {
+            this.notifSound.pause();
+            this.notifSound.currentTime = 0;
+            this.audioEnabled = true;
+        }).catch(() => {});
+    }
 
-.input-panel {
-    display: flex;
-    gap: 10px;
-    padding: 12px;
-    background: #16213e;
-    border-top: 1px solid #0f3460;
-    flex-shrink: 0;
-}
+    playNotificationSound() {
+        // Вибрация
+        if (navigator.vibrate) {
+            navigator.vibrate([50, 30, 50]);
+        }
+        
+        // Звук
+        if (this.audioEnabled) {
+            this.notifSound.currentTime = 0;
+            this.notifSound.play().catch(() => {});
+        }
+        
+        // Визуальное уведомление
+        this.showToast('🔔 Новое сообщение');
+    }
 
-.input-panel input {
-    flex: 1;
-    padding: 11px 16px;
-    border: 2px solid #0f3460;
-    border-radius: 24px;
-    background: #1a1a2e;
-    color: #fff;
-    font-size: 14px;
-    outline: none;
-}
+    showToast(message) {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
 
-.input-panel input::placeholder {
-    color: #666;
-}
+    toggleSettings() {
+        this.settingsPanel.classList.toggle('collapsed');
+        const isCollapsed = this.settingsPanel.classList.contains('collapsed');
+        this.toggleSettingsBtn.textContent = isCollapsed ? '⚙️' : '✖️';
+    }
 
-.input-panel input:focus {
-    border-color: #667eea;
-}
+    copyRoomId() {
+        if (!this.roomId) return;
+        navigator.clipboard.writeText(this.roomId).then(() => {
+            this.showToast('✅ ID скопирован!');
+        }).catch(() => {
+            const textarea = document.createElement('textarea');
+            textarea.value = this.roomId;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            this.showToast('✅ ID скопирован!');
+        });
+    }
 
-.btn-send {
-    width: 44px;
-    height: 44px;
-    border: none;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
+    loadVideo() {
+        const url = this.videoUrlInput.value.trim();
+        if (!url) {
+            this.showToast('⚠️ Введите ссылку');
+            return;
+        }
+        
+        this.video.src = url;
+        this.video.load();
+        this.video.play().catch(() => {});
+        
+        if (this.roomId) {
+            update(ref(this.db, `rooms/${this.roomId}/video`), {
+                play: true,
+                time: 0,
+                src: url
+            });
+        }
+        
+        this.addMsg('🎬 Видео загружено!', 'system');
+        this.videoUrlInput.value = '';
+        this.showToast('✅ Видео загружено!');
+    }
 
-.btn-send:active {
-    transform: scale(0.95);
-}
+    genId() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
 
-/* МОБИЛЬНАЯ ВЕРСИЯ - без черных полос! */
-@media (max-width: 768px) {
-    body {
-        height: 100vh;
-        height: 100dvh;
+    createRoom() {
+        this.roomId = this.genId();
+        set(ref(this.db, `rooms/${this.roomId}`), {
+            created: Date.now(),
+            video: { play: false, time: 0 }
+        });
+        
+        this.roomIdEl.textContent = this.roomId;
+        this.setStatus('Ожидание...', 'connected');
+        this.addMsg(`🎉 Комната ${this.roomId}`, 'system');
+        this.listenRoom();
     }
-    
-    .container {
-        flex-direction: column;
-        height: 100%;
+
+    joinRoom() {
+        const id = this.friendIdInput.value.trim().toUpperCase();
+        if (!id) {
+            this.showToast('⚠️ Введите ID');
+            return;
+        }
+        
+        this.roomId = id;
+        const roomRef = ref(this.db, `rooms/${id}`);
+        
+        onValue(roomRef, (snap) => {
+            if (snap.exists()) {
+                this.roomIdEl.textContent = id;
+                this.setStatus('Подключено', 'connected');
+                this.addMsg(`✅ В комнате ${id}`, 'system');
+                this.listenRoom();
+                this.showToast('✅ Подключено!');
+                // Сворачиваем панель после подключения
+                if (!this.settingsPanel.classList.contains('collapsed')) {
+                    this.toggleSettings();
+                }
+            } else {
+                this.showToast('❌ Комната не найдена');
+            }
+        }, { onlyOnce: true });
     }
-    
-    .video-section {
-        flex: none;
-        height: 40vh;
-        min-height: 180px;
-        max-height: 45vh;
+
+    listenRoom() {
+        // Сообщения
+        onValue(ref(this.db, `rooms/${this.roomId}/messages`), (snap) => {
+            if (!snap.exists()) return;
+            
+            const messages = snap.val();
+            const msgArray = Object.values(messages);
+            
+            msgArray.forEach(msg => {
+                if (msg.time > this.lastMsg && msg.user !== this.userId) {
+                    this.playNotificationSound();
+                    this.addMsg(msg.text, 'other');
+                    this.lastMsg = msg.time;
+                }
+            });
+        });
+
+        // Видео
+        onValue(ref(this.db, `rooms/${this.roomId}/video`), (snap) => {
+            if (!snap.exists()) return;
+            
+            const state = snap.val();
+            
+            if (state.src && state.src !== this.video.src) {
+                this.video.src = state.src;
+                this.video.load();
+                this.addMsg('🎬 Друг загрузил видео', 'system');
+            }
+            
+            if (this.isRemote || !state.play) {
+                if (Math.abs(this.video.currentTime - state.time) > 0.5) {
+                    this.video.currentTime = state.time;
+                }
+                if (state.play && this.video.paused) {
+                    this.video.play().catch(() => {});
+                } else if (!state.play && !this.video.paused) {
+                    this.video.pause();
+                }
+            }
+        });
     }
-    
-    .video-wrapper {
-        padding: 0;
+
+    sendMessage() {
+        const text = this.messageInput.value.trim();
+        if (!text || !this.roomId) return;
+
+        const time = Date.now();
+        push(ref(this.db, `rooms/${this.roomId}/messages`), {
+            text, time, user: this.userId
+        });
+
+        this.addMsg(text, 'my');
+        this.lastMsg = time;
+        this.messageInput.value = '';
     }
-    
-    #video {
-        width: 100%;
-        height: 100%;
-        max-height: 40vh;
+
+    syncVideo(play, time) {
+        if (!this.roomId) return;
+        this.isRemote = false;
+        update(ref(this.db, `rooms/${this.roomId}/video`), { play, time });
+        setTimeout(() => this.isRemote = true, 300);
     }
-    
-    .chat-section {
-        flex: 1;
-        max-width: 100%;
-        min-width: auto;
-        height: 60vh;
-        min-height: calc(100vh - 180px);
+
+    setupVideoListeners() {
+        let wasPlaying = false;
+        
+        this.video.onplay = () => {
+            wasPlaying = true;
+            this.syncVideo(true, this.video.currentTime);
+        };
+        
+        this.video.onpause = () => {
+            wasPlaying = false;
+            this.syncVideo(false, this.video.currentTime);
+        };
+        
+        this.video.onseeked = () => {
+            this.syncVideo(!this.video.paused, this.video.currentTime);
+        };
+        
+        // Фикс fullscreen
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement === null && wasPlaying && this.video.paused) {
+                setTimeout(() => {
+                    this.video.play().catch(() => {});
+                }, 100);
+            }
+        });
+        
+        this.video.addEventListener('webkitendfullscreen', () => {
+            if (wasPlaying && this.video.paused) {
+                setTimeout(() => {
+                    this.video.play().catch(() => {});
+                }, 100);
+            }
+        });
     }
-    
-    .chat-header {
-        padding: 10px 12px;
+
+    addMsg(text, type) {
+        const div = document.createElement('div');
+        div.className = `message ${type}`;
+        div.textContent = text;
+        this.chat.appendChild(div);
+        this.chat.scrollTop = this.chat.scrollHeight;
     }
-    
-    .room-id {
-        font-size: 14px;
-    }
-    
-    .settings-panel {
-        max-height: 300px;
-    }
-    
-    .settings-panel.collapsed {
-        max-height: 0;
-    }
-    
-    .settings-section {
-        padding: 10px 12px;
-    }
-    
-    .join-panel input,
-    .video-url-panel input {
-        font-size: 13px;
-        padding: 9px 11px;
-    }
-    
-    .btn-success,
-    .btn-video {
-        padding: 9px 15px;
-        font-size: 12px;
-    }
-    
-    .chat {
-        padding: 10px;
-        gap: 6px;
-    }
-    
-    .message {
-        max-width: 88%;
-        padding: 9px 12px;
-        font-size: 13px;
-    }
-    
-    .input-panel {
-        padding: 10px;
-    }
-    
-    .input-panel input {
-        padding: 10px 14px;
-        font-size: 14px;
-    }
-    
-    .btn-send {
-        width: 42px;
-        height: 42px;
+
+    setStatus(text, className) {
+        this.statusTextEl.textContent = text;
+        this.statusEl.className = `status ${className}`;
     }
 }
 
-/* iPhone X and newer - safe areas */
-@supports (padding: max(0px)) {
-    body {
-        padding-left: env(safe-area-inset-left);
-        padding-right: env(safe-area-inset-right);
-        padding-bottom: env(safe-area-inset-bottom);
-    }
-    
-    .chat-section {
-        padding-bottom: env(safe-area-inset-bottom);
-    }
-}
-
-/* Toast notification */
-.toast {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: rgba(0, 0, 0, 0.85);
-    color: white;
-    padding: 11px 20px;
-    border-radius: 20px;
-    font-size: 13px;
-    opacity: 0;
-    transition: all 0.3s;
-    z-index: 1000;
-    pointer-events: none;
-    backdrop-filter: blur(10px);
-    white-space: nowrap;
-}
-
-.toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-/* Scrollbar */
-.chat::-webkit-scrollbar {
-    width: 5px;
-}
-
-.chat::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.chat::-webkit-scrollbar-thumb {
-    background: #0f3460;
-    border-radius: 3px;
-}
+new MovieSync();
