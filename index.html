@@ -1,48 +1,66 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Совместный просмотр</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+    <!-- Звук уведомления -->
+    <audio id="notifSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
+    </audio>
+
     <div class="container">
         <div class="video-section">
-            <div class="video-controls">
-                <input type="text" id="videoUrl" placeholder="Вставьте ссылку на видео (.mp4)">
-                <button id="loadVideoBtn">Загрузить видео</button>
+            <div class="video-controls-top">
+                <input type="text" id="videoUrl" placeholder=" Ссылка на видео (.mp4)">
+                <button id="loadVideoBtn" class="btn-primary">Загрузить</button>
             </div>
-            <video id="video" controls>
-                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-            </video>
+
+            <div class="video-wrapper">
+                <video id="video" controls playsinline webkit-playsinline>
+                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                </video>
+            </div>
         </div>
 
         <div class="chat-section">
-            <div class="connection-panel">
+            <div class="chat-header">
                 <div class="room-info">
-                    <div>Комната: <span id="roomId" class="highlight">...</span></div>
-                    <small>Отправьте ID другу</small>
+                    <div class="room-label">📁 Комната</div>
+                    <div class="room-id" id="roomId">...</div>
                 </div>
-                <div class="join-panel">
-                    <input type="text" id="friendId" placeholder="ID комнаты">
-                    <button id="joinBtn">Войти</button>
-                </div>
-                <div id="status" class="status disconnected">Не подключено</div>
+                <button id="copyRoomBtn" class="btn-icon" title="Копировать ID">📋</button>
+            </div>
+
+            <div class="join-panel">
+                <input type="text" id="friendId" placeholder="ID комнаты друга">
+                <button id="joinBtn" class="btn-success">Войти</button>
+            </div>
+
+            <div id="status" class="status disconnected">
+                <span class="status-dot"></span>
+                <span class="status-text">Не подключено</span>
             </div>
 
             <div id="chat" class="chat"></div>
 
             <div class="input-panel">
-                <input type="text" id="messageInput" placeholder="Сообщение...">
-                <button id="sendBtn">➤</button>
+                <input type="text" id="messageInput" placeholder="Написать сообщение..." maxlength="200">
+                <button id="sendBtn" class="btn-send">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
 
     <script type="module" src="app.js"></script>
 </body>
-
 </html>

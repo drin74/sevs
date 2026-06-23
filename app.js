@@ -10,57 +10,121 @@ class MovieSync {
         this.chat = document.getElementById('chat');
         this.roomIdEl = document.getElementById('roomId');
         this.statusEl = document.getElementById('status');
+        this.statusTextEl = this.statusEl.querySelector('.status-text');
         this.friendIdInput = document.getElementById('friendId');
         this.messageInput = document.getElementById('messageInput');
         this.joinBtn = document.getElementById('joinBtn');
         this.sendBtn = document.getElementById('sendBtn');
         this.videoUrlInput = document.getElementById('videoUrl');
         this.loadVideoBtn = document.getElementById('loadVideoBtn');
-        
+        this.copyRoomBtn = document.getElementById('copyRoomBtn');
+        this.notifSound = document.getElementById('notifSound');
+
         this.roomId = null;
         this.userId = 'u' + Math.random().toString(36).substr(2, 9);
         this.lastMsg = 0;
         this.isRemote = false;
-        
+
         this.setupEventListeners();
         this.createRoom();
         this.setupVideoListeners();
+
+        // Разрешить звук после первого взаимодействия
+        this.enableAudio();
+    }
+
+    enableAudio() {
+        // iOS требует взаимодействие пользователя для воспроизведения звука
+        const unlockAudio = () => {
+            this.notifSound.play().then(() => {
+                this.notifSound.pause();
+                this.notifSound.currentTime = 0;
+            }).catch(() => {});
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
+        };
+
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
+    }
+
+    playNotificationSound() {
+        // Вибрация на мобильных
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+
+        // Воспроизведение звука
+        this.notifSound.currentTime = 0;
+        this.notifSound.volume = 0.5;
+        this.notifSound.play().catch(() => {
+            // Если звук не воспроизводится, показываем визуальное уведомление
+            this.showToast('🔔 Новое сообщение');
+        });
+    }
+
+    showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
     }
 
     setupEventListeners() {
         this.joinBtn.addEventListener('click', () => this.joinRoom());
         this.sendBtn.addEventListener('click', () => this.sendMessage());
         this.loadVideoBtn.addEventListener('click', () => this.loadVideo());
-        
+        this.copyRoomBtn.addEventListener('click', () => this.copyRoomId());
+
         this.messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.sendMessage();
         });
-        
+
         this.videoUrlInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.loadVideo();
+        });
+    }
+
+    copyRoomId() {
+        if (!this.roomId) return;
+
+        navigator.clipboard.writeText(this.roomId).then(() => {
+            this.showToast('ID скопирован! 📋');
+        }).catch(() => {
+            // Fallback для старых браузеров
+            const textarea = document.createElement('textarea');
+            textarea.value = this.roomId;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            this.showToast('ID скопирован! 📋');
         });
     }
 
     loadVideo() {
         const url = this.videoUrlInput.value.trim();
         if (!url) {
-            alert('Введите ссылку на видео');
+            this.showToast('Введите ссылку на видео');
             return;
         }
-        
+
         if (!url.match(/\.(mp4|webm|ogg|mov)($|\?)/i)) {
             if (!confirm('Ссылка может не быть видеофайлом. Продолжить?')) {
                 return;
             }
         }
-        
 
         this.video.src = url;
         this.video.load();
-        this.video.play().catch(() => {
+        this.video.play().catch(() => {});
 
-        });
-        
         if (this.roomId) {
             update(ref(this.db, `rooms/${this.roomId}/video`), {
                 play: false,
@@ -68,9 +132,10 @@ class MovieSync {
                 src: url
             });
         }
-        
-        this.addMsg('Видео загружено!', 'system');
+
+        this.addMsg('🎬 Видео загружено!', 'system');
         this.videoUrlInput.value = '';
+        this.showToast('Видео загружено!');
     }
 
     genId() {
@@ -83,26 +148,30 @@ class MovieSync {
             created: Date.now(),
             video: { play: false, time: 0 }
         });
-        
+
         this.roomIdEl.textContent = this.roomId;
         this.setStatus('Ожидание...', 'connected');
-        this.addMsg(`Комната ${this.roomId} создана`, 'system');
+        this.addMsg(`🎉 Комната ${this.roomId} создана`, 'system');
         this.listenRoom();
     }
 
     joinRoom() {
         const id = this.friendIdInput.value.trim().toUpperCase();
-        if (!id) return alert('Введите ID');
-        
+        if (!id) {
+            this.showToast('Введите ID комнаты');
+            return;
+        }
+
         this.roomId = id;
         const roomRef = ref(this.db, `rooms/${id}`);
-        
+
         onValue(roomRef, (snap) => {
             if (snap.exists()) {
                 this.roomIdEl.textContent = id;
                 this.setStatus('Подключено', 'connected');
-                this.addMsg(`В комнате ${id}`, 'system');
+                this.addMsg(`✅ В комнате ${id}`, 'system');
                 this.listenRoom();
+                this.showToast('Подключено!');
             } else {
                 alert('Комната не найдена');
             }
@@ -112,9 +181,10 @@ class MovieSync {
     listenRoom() {
         onValue(ref(this.db, `rooms/${this.roomId}/messages`), (snap) => {
             if (!snap.exists()) return;
-            
+
             Object.values(snap.val()).forEach(msg => {
                 if (msg.time > this.lastMsg && msg.user !== this.userId) {
+                    this.playNotificationSound();
                     this.addMsg(msg.text, 'other');
                     this.lastMsg = msg.time;
                 }
@@ -123,15 +193,16 @@ class MovieSync {
 
         onValue(ref(this.db, `rooms/${this.roomId}/video`), (snap) => {
             if (!snap.exists() || !this.isRemote) return;
-            
+
             const state = snap.val();
-            
+
             if (state.src && state.src !== this.video.src) {
                 this.video.src = state.src;
                 this.video.load();
-                this.addMsg('Друг загрузил новое видео', 'system');
+                this.addMsg('🎬 Друг загрузил видео', 'system');
+                this.showToast('Новое видео от друга');
             }
-            
+
             if (Math.abs(this.video.currentTime - state.time) > 0.5) {
                 this.video.currentTime = state.time;
             }
@@ -175,9 +246,10 @@ class MovieSync {
     }
 
     setStatus(text, className) {
-        this.statusEl.textContent = text;
+        this.statusTextEl.textContent = text;
         this.statusEl.className = `status ${className}`;
     }
 }
 
+// Запуск
 new MovieSync();
