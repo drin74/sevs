@@ -19,22 +19,19 @@ class MovieSync {
         this.loadVideoBtn = document.getElementById('loadVideoBtn');
         this.copyRoomBtn = document.getElementById('copyRoomBtn');
         this.notifSound = document.getElementById('notifSound');
-
+        
         this.roomId = null;
         this.userId = 'u' + Math.random().toString(36).substr(2, 9);
         this.lastMsg = 0;
         this.isRemote = false;
-
+        
         this.setupEventListeners();
         this.createRoom();
         this.setupVideoListeners();
-
-        // Разрешить звук после первого взаимодействия
         this.enableAudio();
     }
 
     enableAudio() {
-        // iOS требует взаимодействие пользователя для воспроизведения звука
         const unlockAudio = () => {
             this.notifSound.play().then(() => {
                 this.notifSound.pause();
@@ -43,22 +40,17 @@ class MovieSync {
             document.removeEventListener('click', unlockAudio);
             document.removeEventListener('touchstart', unlockAudio);
         };
-
         document.addEventListener('click', unlockAudio);
         document.addEventListener('touchstart', unlockAudio);
     }
 
     playNotificationSound() {
-        // Вибрация на мобильных
         if (navigator.vibrate) {
             navigator.vibrate(50);
         }
-
-        // Воспроизведение звука
         this.notifSound.currentTime = 0;
         this.notifSound.volume = 0.5;
         this.notifSound.play().catch(() => {
-            // Если звук не воспроизводится, показываем визуальное уведомление
             this.showToast('🔔 Новое сообщение');
         });
     }
@@ -68,7 +60,6 @@ class MovieSync {
         toast.className = 'toast';
         toast.textContent = message;
         document.body.appendChild(toast);
-
         setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => {
             toast.classList.remove('show');
@@ -81,11 +72,11 @@ class MovieSync {
         this.sendBtn.addEventListener('click', () => this.sendMessage());
         this.loadVideoBtn.addEventListener('click', () => this.loadVideo());
         this.copyRoomBtn.addEventListener('click', () => this.copyRoomId());
-
+        
         this.messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.sendMessage();
         });
-
+        
         this.videoUrlInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.loadVideo();
         });
@@ -93,11 +84,9 @@ class MovieSync {
 
     copyRoomId() {
         if (!this.roomId) return;
-
         navigator.clipboard.writeText(this.roomId).then(() => {
             this.showToast('ID скопирован! 📋');
         }).catch(() => {
-            // Fallback для старых браузеров
             const textarea = document.createElement('textarea');
             textarea.value = this.roomId;
             document.body.appendChild(textarea);
@@ -114,25 +103,25 @@ class MovieSync {
             this.showToast('Введите ссылку на видео');
             return;
         }
-
+        
         if (!url.match(/\.(mp4|webm|ogg|mov)($|\?)/i)) {
             if (!confirm('Ссылка может не быть видеофайлом. Продолжить?')) {
                 return;
             }
         }
-
+        
         this.video.src = url;
         this.video.load();
         this.video.play().catch(() => {});
-
+        
         if (this.roomId) {
             update(ref(this.db, `rooms/${this.roomId}/video`), {
-                play: false,
+                play: true,
                 time: 0,
                 src: url
             });
         }
-
+        
         this.addMsg('🎬 Видео загружено!', 'system');
         this.videoUrlInput.value = '';
         this.showToast('Видео загружено!');
@@ -148,7 +137,7 @@ class MovieSync {
             created: Date.now(),
             video: { play: false, time: 0 }
         });
-
+        
         this.roomIdEl.textContent = this.roomId;
         this.setStatus('Ожидание...', 'connected');
         this.addMsg(`🎉 Комната ${this.roomId} создана`, 'system');
@@ -161,10 +150,10 @@ class MovieSync {
             this.showToast('Введите ID комнаты');
             return;
         }
-
+        
         this.roomId = id;
         const roomRef = ref(this.db, `rooms/${id}`);
-
+        
         onValue(roomRef, (snap) => {
             if (snap.exists()) {
                 this.roomIdEl.textContent = id;
@@ -181,7 +170,7 @@ class MovieSync {
     listenRoom() {
         onValue(ref(this.db, `rooms/${this.roomId}/messages`), (snap) => {
             if (!snap.exists()) return;
-
+            
             Object.values(snap.val()).forEach(msg => {
                 if (msg.time > this.lastMsg && msg.user !== this.userId) {
                     this.playNotificationSound();
@@ -193,16 +182,16 @@ class MovieSync {
 
         onValue(ref(this.db, `rooms/${this.roomId}/video`), (snap) => {
             if (!snap.exists() || !this.isRemote) return;
-
+            
             const state = snap.val();
-
+            
             if (state.src && state.src !== this.video.src) {
                 this.video.src = state.src;
                 this.video.load();
                 this.addMsg('🎬 Друг загрузил видео', 'system');
                 this.showToast('Новое видео от друга');
             }
-
+            
             if (Math.abs(this.video.currentTime - state.time) > 0.5) {
                 this.video.currentTime = state.time;
             }
@@ -232,9 +221,39 @@ class MovieSync {
     }
 
     setupVideoListeners() {
-        this.video.onplay = () => this.syncVideo(true, this.video.currentTime);
-        this.video.onpause = () => this.syncVideo(false, this.video.currentTime);
-        this.video.onseeked = () => this.syncVideo(!this.video.paused, this.video.currentTime);
+        let wasPlaying = false;
+        
+        this.video.onplay = () => {
+            wasPlaying = true;
+            this.syncVideo(true, this.video.currentTime);
+        };
+        
+        this.video.onpause = () => {
+            wasPlaying = false;
+            this.syncVideo(false, this.video.currentTime);
+        };
+        
+        this.video.onseeked = () => {
+            this.syncVideo(!this.video.paused, this.video.currentTime);
+        };
+        
+        // Фикс паузы при выходе из fullscreen
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement === null && wasPlaying && this.video.paused) {
+                setTimeout(() => {
+                    this.video.play().catch(() => {});
+                }, 100);
+            }
+        });
+        
+        // Для iOS Safari
+        this.video.addEventListener('webkitendfullscreen', () => {
+            if (wasPlaying && this.video.paused) {
+                setTimeout(() => {
+                    this.video.play().catch(() => {});
+                }, 100);
+            }
+        });
     }
 
     addMsg(text, type) {
@@ -251,5 +270,4 @@ class MovieSync {
     }
 }
 
-// Запуск
 new MovieSync();

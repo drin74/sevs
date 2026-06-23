@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,19 +10,16 @@
     <link rel="stylesheet" href="style.css">
     <script type="module" src="app.js"></script>
 </head>
+
 <body>
-    <!-- Звук уведомления -->
     <audio id="notifSound" preload="auto">
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
+        <source
+            src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE"
+            type="audio/wav">
     </audio>
 
     <div class="container">
         <div class="video-section">
-            <div class="video-controls-top">
-                <input type="text" id="videoUrl" placeholder=" Ссылка на видео (.mp4)">
-                <button id="loadVideoBtn" class="btn-primary">Загрузить</button>
-            </div>
-
             <div class="video-wrapper">
                 <video id="video" controls playsinline webkit-playsinline>
                     <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
@@ -48,6 +46,11 @@
                 <span class="status-text">Не подключено</span>
             </div>
 
+            <div class="video-url-panel">
+                <input type="text" id="videoUrl" placeholder=" Ссылка на видео (.mp4)">
+                <button id="loadVideoBtn" class="btn-video">Загрузить</button>
+            </div>
+
             <div id="chat" class="chat"></div>
 
             <div class="input-panel">
@@ -64,4 +67,5 @@
 
     <script type="module" src="app.js"></script>
 </body>
+
 </html>
