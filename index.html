@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Совместный просмотр</title>
@@ -33,22 +34,33 @@
                     <div class="room-label">📁 Комната</div>
                     <div class="room-id" id="roomId">...</div>
                 </div>
-                <button id="copyRoomBtn" class="btn-icon" title="Копировать ID">📋</button>
+                <div class="header-buttons">
+                    <button id="toggleSettingsBtn" class="btn-header" title="Настройки">⚙️</button>
+                    <button id="copyRoomBtn" class="btn-header" title="Копировать ID">📋</button>
+                </div>
             </div>
 
-            <div class="join-panel">
-                <input type="text" id="friendId" placeholder="ID комнаты друга">
-                <button id="joinBtn" class="btn-success">Войти</button>
-            </div>
+            <!-- Сворачиваемая панель настроек -->
+            <div id="settingsPanel" class="settings-panel">
+                <div class="settings-section">
+                    <div class="section-title">🚪 Войти в комнату</div>
+                    <div class="join-panel">
+                        <input type="text" id="friendId" placeholder="ID комнаты друга">
+                        <button id="joinBtn" class="btn-success">Войти</button>
+                    </div>
+                    <div id="status" class="status disconnected">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Не подключено</span>
+                    </div>
+                </div>
 
-            <div id="status" class="status disconnected">
-                <span class="status-dot"></span>
-                <span class="status-text">Не подключено</span>
-            </div>
-
-            <div class="video-url-panel">
-                <input type="text" id="videoUrl" placeholder=" Ссылка на видео (.mp4)">
-                <button id="loadVideoBtn" class="btn-video">Загрузить</button>
+                <div class="settings-section">
+                    <div class="section-title">🎬 Загрузить видео</div>
+                    <div class="video-url-panel">
+                        <input type="text" id="videoUrl" placeholder="Ссылка на видео (.mp4)">
+                        <button id="loadVideoBtn" class="btn-video">Загрузить</button>
+                    </div>
+                </div>
             </div>
 
             <div id="chat" class="chat"></div>
